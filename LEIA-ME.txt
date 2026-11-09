@@ -1,0 +1,138 @@
+LIMPA SOM - teste do microfone e correção do chiado
+====================================================
+
+O QUE É
+  Um programa que mede o áudio do seu microfone, ajusta tudo o que o computador permite
+  para reduzir o chiado e, no fim, diz com clareza: o que ele corrigiu, o que ainda falta
+  você configurar e o que NÃO é configuração (é hardware, cabo, tomada ou sala).
+  Tudo roda no seu computador. Nenhum áudio é enviado para a internet.
+
+COMO USAR
+  1. Dê dois cliques em INICIAR.bat: abre a janela do programa.
+     Na primeira vez ele instala o que precisa (1 a 2 minutos, precisa de internet).
+  2. Escolha o microfone na caixa do canto superior direito (já vem o padrão do Windows) e
+     clique em "Testar o microfone e corrigir o chiado". O programa pergunta uma vez como o
+     microfone está ligado (direto no PC, mesa de som, interface USB...) e depois guia cada
+     etapa com uma instrução só, grande, do tipo "Fique em silêncio" ou "Leia o texto em voz
+     alta", com botão Continuar, barra de progresso e medidor de nível.
+     Feche Discord, OBS, Zoom e Teams antes: eles seguram o microfone.
+  3. No fim a nota aparece em cartões grandes, e logo abaixo vem "Em palavras simples": de onde
+     vem o problema, por que isso costuma acontecer e o que fazer, na ordem do que mais
+     adianta. O botão "Abrir relatório completo" mostra, no navegador, a mesma explicação,
+     os gráficos e os áudios (antes, depois e limpo) para você ouvir.
+  Prefere texto, sem janela? INICIAR.bat --console
+
+O QUE O TESTE FAZ (cerca de 5 minutos)
+  1. Grava 7 s de silêncio e 14 s da sua voz lendo um texto, e mede ruído, nível, zumbido,
+     apitos, estouro de áudio (clipping), largura de banda e ganho automático.
+  2. Ajuste de ganho: testa as combinações de "Aumento de sensibilidade do microfone"
+     (reforço) + volume de entrada do Windows e fica com a que dá MENOS chiado para o mesmo
+     volume de voz. Só faz isso se você permitir, e guarda as configurações originais.
+  3. Grava de novo para conferir. Se o resultado ficar pior, volta ao original sozinho.
+  4. Dois testes de causa:
+       A) modo exclusivo: ignora os efeitos de áudio do Windows/driver. Se o chiado
+          diminuir, os efeitos são o culpado (e isso é configuração).
+       B) isolamento da fonte: você silencia o microfone/mesa (ou cobre o microfone). Se o
+          ruído continua igual, ele nasce na entrada do computador, e não dá para resolver
+          por configuração.
+  5. Gera uma versão com limpeza digital (filtro de graves, remoção de zumbido e redução
+     de chiado) para você comparar.
+  6. Cria o equalizador do seu microfone, testa na sua voz e (se você confirmar) aplica no
+     Equalizer APO. Veja "EQUALIZADOR DO MICROFONE" abaixo.
+
+A NOTA (0 a 10)
+  Baseada na relação sinal/ruído: o quanto sua voz é mais forte que o chiado de fundo,
+  com descontos por estouro de áudio, zumbido, apitos, corte de agudos e ganho automático.
+    9-10 estúdio | 8 muito bom | 7 bom | 6 chiado perceptível em fones | abaixo de 4,5 ruim
+  A nota da "limpeza digital" é uma estimativa e nunca passa de 2,5 pontos acima da real:
+  limpeza digital esconde chiado, mas não troca o microfone.
+
+O QUE O PROGRAMA PODE MUDAR NO SEU COMPUTADOR
+  - Volume de entrada do microfone no Windows.
+  - "Aumento de sensibilidade do microfone" (reforço), nas placas que têm.
+  - Tira o microfone do mudo, se estiver mudo.
+  Se o ajuste de ganho não melhora a relação voz/ruído (acontece quando o ruído já nasce antes
+  do computador, como em mesa de som), ele desfaz a mudança e explica, em vez de deixar o ganho
+  alterado sem benefício.
+  Não instala drivers e não mexe no registro do Windows. O equalizador (do Limpa Som e do
+  Equalizador ao vivo) escreve na pasta do Equalizer APO, mas só depois que você confirma.
+  Para desfazer: tela inicial > "Restaurar configurações do microfone". Se o programa for
+  interrompido ou der erro no meio do ajuste, ele volta o ganho ao original sozinho.
+
+  O que o programa NÃO consegue ligar/desligar sozinho (ele abre a tela certa e explica):
+  efeitos de áudio do Windows, taxa de amostragem e configurações dentro de Discord/OBS.
+
+OUTRAS OPÇÕES DA TELA INICIAL
+  - Ajuste ao vivo: medidor de nível grande para regular o ganho da mesa/interface enquanto
+    você fala (alvo: picos entre -12 e -6 dB). Botão Parar para sair.
+  - Limpar um arquivo de áudio/vídeo que você já gravou: cria uma cópia "_limpo". Para mp3
+    e vídeos precisa do ffmpeg (winget install Gyan.FFmpeg).
+
+EQUALIZADOR DO MICROFONE (Discord, OBS, Zoom, Teams...)
+  São dois programas que trabalham juntos:
+    - O LIMPA SOM descobre onde está o ruído e CRIA o equalizador. No fim do teste completo (ou
+      pelo cartão "Criar e aplicar o equalizador" da tela inicial) ele:
+        1. compara, faixa de frequência por faixa, a sua voz com o ruído: onde o ruído é do
+           tamanho da voz ele baixa a faixa na medida certa; onde só há ruído (graves de
+           vibração, agudos acima da voz) ele corta forte;
+        2. põe um notch exatamente em cada zumbido e apito que mediu (até 16);
+        3. liga a IA anti-chiado (RNNoise) com a porta de voz configurada;
+        4. TESTA o equalizador na sua própria gravação de voz, rodando o plugin de IA de verdade
+           (o mesmo do Equalizer APO), e fica com a variante que mede melhor: mais voz contra
+           ruído, sem apagar a voz e sem sobrar apito;
+        5. guarda o equalizador (o Equalizador ao vivo mostra esse) e, se você confirmar, aplica
+           no Equalizer APO. O config.txt original fica em config.txt.limpa_som.bak.
+      Se o equalizador já estiver ligado, o teste desliga durante a medição (senão ele
+      esconderia o ruído de verdade) e religa no fim.
+    - O EQUALIZADOR AO VIVO (cartão da tela inicial ou EQUALIZADOR.bat) mostra EXATAMENTE o
+      equalizador que o Limpa Som criou e deixa mexer em tudo, como no editor do Equalizer APO:
+        * lista de filtros: tipo (pico, prateleira de graves, prateleira de agudos, corta
+          graves, corta agudos, notch), frequência, ganho, Q, ligar/desligar cada um, apagar e
+          adicionar; cada filtro do Limpa Som traz escrito o porquê de existir;
+        * curva em que você arrasta os pontos (para os lados muda a frequência, para cima e para
+          baixo o ganho; a roda do mouse muda o Q);
+        * ganho de entrada antes de tudo e a supressão de ruído por IA: desligada, normal ou
+          forte (2 passadas) e a porta de voz (quanto maior, mais ele silencia o chiado entre
+          as palavras; alta demais pode cortar voz baixa);
+        * botão grande Ligado/Desligado, "Voltar ao do Limpa Som" e "Desligar tudo e desfazer".
+      Tudo vale em segundo plano, para todos os programas, mesmo com a janela fechada. A janela
+      só escreve no Equalizer APO quando você mexe, e pede confirmação na primeira vez.
+  Para o Equalizer APO funcionar no microfone, ele precisa estar ligado a ele (uma vez só): abra
+  o Configurator (administrador), aba "Capture devices", marque o microfone, OK e reinicie o
+  Windows. As três luzes do topo do Equalizador dizem se está instalado, ligado ao microfone e
+  ativo.
+  O que um equalizador consegue: ele tira zumbido, apitos, ronco e agudos sem voz. O chiado
+  espalhado NA MESMA FAIXA da voz só a IA tira, e ela precisa estar com a configuração do plugin
+  gravada no arquivo (sem ela o plugin quase não limpa: medido em +0,4 dB contra +6 dB). Se a voz
+  chega fraca à entrada, o que resolve é subir o ganho na mesa/interface.
+  Limites: só vale para apps que usam o microfone em modo normal (a maioria). No Discord/Zoom
+  deixe a supressão de ruído deles baixa ou desligada, para não processar duas vezes. Uma passada
+  de IA limpa mais que duas nas gravações testadas.
+
+ONDE FICAM OS ARQUIVOS
+  resultados\teste_AAAAMMDD_HHMMSS\   relatorio.html, 1_antes.wav, 2_depois.wav, 3_limpo.wav
+  resultados\historico.json           notas de cada teste (para comparar ao trocar cabo/porta)
+  resultados\backup_*.json            configurações originais do microfone
+  resultados\equalizador.json         o equalizador de cada microfone (o atual e o que o Limpa Som criou)
+
+DICAS PARA UM TESTE CONFIÁVEL
+  - Fale na distância em que você realmente usa o microfone, e igual nas duas gravações.
+  - Silêncio de verdade: sem teclado, mouse, ventilador próximo ou conversa.
+  - Depois de trocar de porta USB, cabo ou tomada, rode o teste de novo: o histórico mostra
+    se a nota subiu.
+  - Se a sua mesa também aparece como placa de som USB (por exemplo "Microfone (S200)"), teste
+    escolhendo essa entrada na caixa do canto: ela não passa pela entrada analógica do computador
+    (onde costuma nascer o zumbido de 60 Hz e o chiado) e a nota pode ser bem diferente.
+
+PROBLEMAS COMUNS
+  - "Silêncio absoluto": microfone mudo ou bloqueado. Abra Configurações > Privacidade >
+    Microfone e libere "Permitir que aplicativos da área de trabalho acessem o microfone".
+  - "Não consegui abrir o microfone": feche programas que usam o microfone.
+  - Verificar a instalação:  INICIAR.bat --autoteste
+  - Se algo der erro, o detalhe técnico fica em resultados\erro.log.
+  - Ver como o programa se comporta sem falar nada (demonstração, abre a janela com um
+    microfone de mentira):
+      INICIAR.bat --simular            (lista os cenários)
+      INICIAR.bat --simular placa_ruidosa
+  - Só medir, sem mudar nenhuma configuração:  INICIAR.bat --sem-ajuste
+  - Seu nome nas mensagens: edite config.json.
